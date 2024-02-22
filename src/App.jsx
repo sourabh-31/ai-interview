@@ -23,7 +23,7 @@ function App() {
         }
       />
       <Route
-        path="/screen"
+        path="screen"
         element={
           <Interview
             setMedia={setMedia}
@@ -32,10 +32,7 @@ function App() {
           />
         }
       />
-      <Route
-        path="/result"
-        element={<Result media={media} answer={answer} />}
-      />
+      <Route path="result" element={<Result media={media} answer={answer} />} />
     </Routes>
   );
 }

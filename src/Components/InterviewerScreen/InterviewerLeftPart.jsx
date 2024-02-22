@@ -15,7 +15,7 @@ import LeftPartIcons from "./LeftPartIcons";
 function InterviewerLeftPart({ avatarName }) {
   return (
     <>
-      <div className="flex w-[42%] h-[80%] gap-24 shadow-2xl rounded-r-xl bg-white border-t-8 border-b-8 border-[#f4f6f8] relative top-24">
+      <div className="flex w-[42%] h-[80%] gap-24 rounded-r-xl bg-white border-t-8 border-b-8 border-[#f4f6f8] relative top-24 leftpart">
         <div className="p-6">
           <p className="text-xl font-medium mb-2 text-secondaryColor">
             Remostart

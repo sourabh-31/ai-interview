@@ -1,13 +1,44 @@
 import { useEffect, useState } from "react";
 import ProgressBar from "./ProgressBar";
 import StarRating from "./StarRating";
+import callOpenAi from "../utils/OpenAI";
+import Loader from "../utils/Loader";
+import Error from "../utils/Error";
 
 function Result({ media, answer }) {
   const [userRating, setUserRating] = useState("");
   console.log(userRating);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const [savedMedia, setSavedMedia] = useState(null);
-  const [savedAnswer, setSavedAnswer] = useState(null);
+  const [savedAnswer, setSavedAnswer] = useState([]);
+
+  const [feedback, setFeedback] = useState([]);
+
+  const response =
+    "I'm sourabh, a software developer with 2 years of experience. I specialize in web development, mobile apps, etc. In my previous roles, I've successfully delivered a social media applicastion. I'm passionate about staying updated on emerging technologies and solving complex problems. I'm so much happy about the opportunity.";
+
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const parsedResponse = await callOpenAi(answer);
+        setFeedback(parsedResponse);
+        setIsLoading(false);
+      } catch (error) {
+        setError("There was an error while generating feedback!");
+        setIsLoading(false);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    if (answer) {
+      fetchData();
+    }
+  }, [answer]);
 
   useEffect(
     function () {
@@ -23,19 +54,21 @@ function Result({ media, answer }) {
     setSavedMedia(item);
   }, []);
 
+  useEffect(() => {
+    if (feedback && Object.keys(feedback).length > 0) {
+      localStorage.setItem("resAnswer", JSON.stringify(feedback));
+    }
+  }, [feedback]);
+
   useEffect(
     function () {
-      if (answer) {
-        localStorage.setItem("resAnswer", answer);
+      if (feedback) {
+        const item = localStorage.getItem("resAnswer");
+        setSavedAnswer(JSON.parse(item));
       }
     },
-    [answer]
+    [feedback]
   );
-
-  useEffect(function () {
-    const item = localStorage.getItem("resAnswer");
-    setSavedAnswer(item);
-  }, []);
 
   return (
     <main>
@@ -66,25 +99,50 @@ function Result({ media, answer }) {
       </section>
 
       <section className="mt-16 flex justify-between h-96 w-80 ml-auto mr-auto border-[1px] border-gray-200 rounded-2xl">
-        <div className="flex flex-wrap justify-evenly pt-10 ml-10 gap-8 w-96">
-          <ProgressBar pathColor="#2196F3" label="Performance" value={3} />
-          <ProgressBar pathColor="#FFD700" label="Confidence" value={4} />
-          <ProgressBar pathColor="#FC9483" label="Communication" value={3} />
-          <ProgressBar pathColor="#5DBB63" label="Grammar" value={2} />
-          <div className="flex flex-col items-center">
-            <label className="font-medium mb-2">Energy Level</label>
-            <span className="text-7xl">😄</span>
-          </div>
-        </div>
+        {isLoading && <Loader />}
+        {error && <Error error={error} />}
+        {!isLoading && !error && savedAnswer && (
+          <>
+            <div className="flex flex-wrap justify-evenly pt-10 ml-24 gap-8 w-96">
+              <ProgressBar
+                pathColor="#2196F3"
+                label="Performance"
+                value={Number(savedAnswer.Performance)}
+              />
+              <ProgressBar
+                pathColor="#FFD700"
+                label="Confidence"
+                value={Number(savedAnswer.Confidence)}
+              />
+              <ProgressBar
+                pathColor="#FC9483"
+                label="Fluency"
+                value={Number(savedAnswer.Fluency)}
+              />
+              <ProgressBar
+                pathColor="#5DBB63"
+                label="Grammar"
+                value={Number(savedAnswer.Grammar)}
+              />
+              <div className="flex flex-col items-center">
+                <label className="font-medium mb-2">Energy Level</label>
+                <span className="text-7xl">
+                  {savedAnswer.Sentiment === "Positive" && "😄"}
+                  {savedAnswer.Sentiment === "Negative" && "☹️"}
+                  {savedAnswer.Sentiment === "Neutral" && "🙂"}
+                </span>
+              </div>
+            </div>
 
-        <div className="border-l-[1px] border-gray-200 w-60 px-8 py-6">
-          <p className="text-2xl font-medium mb-4">
-            Candidate&apos;s response →
-          </p>
-          <span className="text-base font-normal">
-            {savedAnswer && savedAnswer}
-          </span>
-        </div>
+            <div className="border-l-[1px] border-gray-200 w-60 px-8 py-6">
+              <p className="text-2xl font-medium mb-4">Feedback →</p>
+              <span className="text-xl font-normal">
+                {/* {savedAnswer && savedAnswer} */}
+                {savedAnswer && savedAnswer.Feedback}
+              </span>
+            </div>
+          </>
+        )}
       </section>
     </main>
   );
