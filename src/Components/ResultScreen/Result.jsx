@@ -17,9 +17,6 @@ function Result({ media, answer }) {
 
   const [feedback, setFeedback] = useState([]);
 
-  const response =
-    "I'm sourabh, a software developer with 2 years of experience. I specialize in web development, mobile apps, etc. In my previous roles, I've successfully delivered a social media applicastion. I'm passionate about staying updated on emerging technologies and solving complex problems. I'm so much happy about the opportunity.";
-
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
